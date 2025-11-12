@@ -43,6 +43,11 @@ resource "google_project_service" "cloudresourcemanager" {
   disable_on_destroy = false
 }
 
+resource "google_project_service" "monitoring" {
+  service            = "monitoring.googleapis.com"
+  disable_on_destroy = false
+}
+
 # --- Artifact Registry --- #
 resource "google_artifact_registry_repository" "n8n_repo" {
   project       = var.gcp_project_id
@@ -181,7 +186,7 @@ resource "google_cloud_run_v2_service" "n8n" {
     service_account = google_service_account.n8n_sa.email
     scaling {
       max_instance_count = var.cloud_run_max_instances # Guide uses 1
-      min_instance_count = 0
+      min_instance_count = 1
     }
     volumes {
       name = "cloudsql"
@@ -327,7 +332,7 @@ resource "google_cloud_run_v2_service" "n8n" {
 
       startup_probe {
         initial_delay_seconds = 120 # Added from GitHub issue solution
-        timeout_seconds       = 240
+        timeout_seconds       = 5   # Must be less than period_seconds
         period_seconds        = 10 # Reduced period for faster checks
         failure_threshold     = 3  # Standard threshold
         tcp_socket {
