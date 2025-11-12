@@ -70,7 +70,14 @@ resource "google_sql_database_instance" "n8n_db_instance" {
     disk_type         = "PD_HDD" # Match guide
     disk_size         = var.db_storage_size
     backup_configuration {
-      enabled = false # Match guide
+      enabled                        = true
+      start_time                     = "03:00" # Daily backup window at 3 AM UTC (Cloud SQL creates daily backups by default when enabled)
+      point_in_time_recovery_enabled = true
+      transaction_log_retention_days = 7
+      backup_retention_settings {
+        retained_backups = 14 # Keep 14 daily backups (14 days)
+        retention_unit   = "COUNT"
+      }
     }
   }
   deletion_protection = false # Allow deletion in Terraform
@@ -264,7 +271,7 @@ resource "google_cloud_run_v2_service" "n8n" {
         value_source {
           secret_key_ref {
             secret  = google_secret_manager_secret.db_password_secret.secret_id
-            version = "latest"
+            version = "1"
           }
         }
       }

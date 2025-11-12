@@ -8,8 +8,8 @@
 .terraform.lock.hcl
 
 # Terraform sensitive variables
-terraform.tfvars
-*.tfvars
+# terraform.tfvars
+# *.tfvars
 
 # Crash log files
 crash.log
